@@ -61,10 +61,6 @@ class Event extends Model
             return 'finished';
         }
 
-        if ($this->isFull()) {
-            return 'full';
-        }
-
         if ($this->isInProgress()) {
             return 'in_progress';
         }
@@ -72,7 +68,11 @@ class Event extends Model
         if ($this->isClosed()) {
             return 'closed';
         }
-
+        
+        if ($this->isFull()) {
+            return 'full';
+        }
+        
         return 'open';
     }
     public function availableSpots()
