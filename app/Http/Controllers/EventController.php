@@ -21,10 +21,10 @@ class EventController extends Controller
 
             if ($statusSearch === 'aperto') {
 
-                $query->whereDate('event_date', '>=', now())
+                $query->whereDate('event_date', '>', today())
                     ->where(function ($q) {
                         $q->whereNull('registration_deadline')
-                            ->orWhereDate('registration_deadline', '>=', now());
+                            ->orWhereDate('registration_deadline', '>=', today());
                     })
                     ->whereRaw('(
                 select count(*)
@@ -34,12 +34,15 @@ class EventController extends Controller
 
             } elseif ($statusSearch === 'chiuso') {
 
-                $query->whereDate('event_date', '>=', now())
-                    ->whereDate('registration_deadline', '<', now());
+                $query->whereDate('event_date', '>', today())
+                    ->whereDate('registration_deadline', '<', today());
 
             } elseif ($statusSearch === 'concluso') {
 
-                $query->whereDate('event_date', '<', now());
+                $query->whereDate('event_date', '<', today());
+            } elseif ($statusSearch === 'in corso') {
+
+                $query->whereDate('event_date', '=', today());
             } elseif ($statusSearch === 'pieno') {
 
                 $query->whereRaw('(
@@ -65,11 +68,11 @@ class EventController extends Controller
         // FILTER AVAILABLE
         if ($filter === 'available') {
 
-            $query->whereDate('event_date', '>=', now())
+            $query->whereDate('event_date', '>', today())
 
                 ->where(function ($q) {
                     $q->whereNull('registration_deadline')
-                        ->orWhereDate('registration_deadline', '>=', now());
+                        ->orWhereDate('registration_deadline', '>=', today());
                 })
 
                 ->whereRaw('(
@@ -115,9 +118,9 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::findOrFail($id);
-        if ($event->isFinished()) {
+        if ($event->isFinished() || $event->isInProgress()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso.');
+                ->with('error', 'Non puoi modificare un evento concluso o in corso.');
         }
         return view('edit-event', [
             'event' => $event
@@ -131,9 +134,9 @@ class EventController extends Controller
 
         $event = Event::findOrFail($id);
 
-        if ($event->isFinished()) {
+        if ($event->isFinished() || $event->isInProgress()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso.');
+                ->with('error', 'Non puoi modificare un evento concluso o in corso.');
         }
 
         $oldTitle = $event->title;
@@ -178,8 +181,8 @@ class EventController extends Controller
             return back()->with('error', 'Operazione non consentita.');
         }
 
-        if ($event->isFinished()) {
-            return back()->with('error', 'Non puoi iscriverti a un evento concluso.');
+        if ($event->isFinished() || $event->isInProgress()) {
+            return back()->with('error', 'Non puoi iscriverti a un evento concluso o in corso.');
         }
 
         if ($event->isClosed()) {

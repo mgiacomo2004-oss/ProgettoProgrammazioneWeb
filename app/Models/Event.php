@@ -28,7 +28,12 @@ class Event extends Model
 
     public function isFinished()
     {
-        return $this->event_date->isPast();
+        return $this->event_date->isBefore(today());
+    }
+
+    public function isInProgress()
+    {
+        return $this->event_date->isToday();
     }
 
     public function isClosed()
@@ -60,6 +65,10 @@ class Event extends Model
             return 'full';
         }
 
+        if ($this->isInProgress()) {
+            return 'in_progress';
+        }
+
         if ($this->isClosed()) {
             return 'closed';
         }
@@ -77,6 +86,7 @@ class Event extends Model
             'finished' => 'CONCLUSO',
             'full' => 'PIENO',
             'closed' => 'CHIUSO',
+            'in_progress' => 'IN CORSO',
             default => 'APERTO',
         };
     }
@@ -87,6 +97,7 @@ class Event extends Model
             'finished' => 'text-gray-600',
             'full' => 'text-red-600',
             'closed' => 'text-orange-600',
+            'in_progress' => 'text-blue-500',
             default => 'text-green-600',
         };
     }

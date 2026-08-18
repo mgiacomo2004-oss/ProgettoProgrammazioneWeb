@@ -21,7 +21,7 @@
                     {{ session('error') }}
                 </div>
             @endif
-            {{-- FILTRI + SEARCH + ADMIN --}}
+            {{-- FILTRI + SEARCH + ADMIN  --}} 
             <div class="flex flex-col gap-4 mb-6">
 
                 @php
@@ -30,12 +30,12 @@
 
                 <div class="flex gap-4 mb-4 text-sm">
 
-                    <a href="/events" class="px-2 py-1 rounded
+                    
+                    @if(auth()->user()?->role !== 'admin')
+                        <a href="/events" class="px-2 py-1 rounded
        {{ !$filter ? 'font-bold underline text-gray-900' : 'text-gray-600 hover:text-gray-900' }}">
                         Tutti
-                    </a>
-
-                    @if(auth()->user()?->role !== 'admin')
+                         </a>
 
                          <a href="/events?filter=available" class="px-2 py-1 rounded
        {{ $filter === 'available' ? 'font-bold underline text-gray-900' : 'text-gray-600 hover:text-gray-900' }}">
@@ -49,7 +49,7 @@
                     @endif
 
                 </div>
-                {{-- SEARCH + ADMIN --}}
+                {{-- SEARCH + ADMIN  --}} 
                 <div class="flex justify-between items-center">
 
                     <form method="GET" action="/events" class="flex gap-2">
@@ -159,11 +159,9 @@
                                     </td>
 
                                     <td class="px-6 py-4 text-sm">
-
-                                        <span class="{{ $event->statusColor() }} font-semibold">
-                                        {{ $event->displayStatus() }}
+                                         <span class="{{ $event->statusColor() }} font-semibold">
+                                           {{ $event->displayStatus() }}
                                         </span>
-
                                     </td>
                                     
                                     @if(auth()->user()?->role !== 'admin')

@@ -23,12 +23,12 @@
                     </div>
                 @endif
 
-                {{-- TITOLO --}}
+                {{-- titolo --}}
                 <h1 class="text-2xl font-bold text-gray-900">
                     {{ $event->title }}
                 </h1>
 
-                {{-- DETTAGLI --}}
+                {{-- dettagli --}}
                 <div class="space-y-2 text-gray-700">
 
                     <p><span class="font-semibold">Descrizione:</span><br>{{ $event->description }}</p>
@@ -131,7 +131,7 @@
                     </div>
 
                 @endif
-                {{-- AZIONI ADMIN --}}
+                {{-- azioni admin --}}
                 @if(Auth::check() && Auth::user()->role === 'admin')
                     <div class="flex gap-3 pt-4">
                         @if(!$event->isFinished())
@@ -152,7 +152,7 @@
                     </div>
                 @endif
 
-                {{-- BACK --}}
+                {{-- back --}}
                 <div class="pt-4">
                     <a href="/events" class="text-gray-600 hover:underline">
                         ← Torna alla lista
