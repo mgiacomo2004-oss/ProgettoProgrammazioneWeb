@@ -158,6 +158,11 @@ class EventController extends Controller
     {
         $event = Event::findOrFail($id);
 
+        if ($event->isInProgress()) {
+            return redirect('/events')
+                ->with('error', 'Non puoi eliminare un evento in corso.');
+        }
+
         foreach ($event->users as $user) {
 
             $user->notifications()->create([

@@ -133,22 +133,50 @@
                 @endif
                 {{-- azioni admin --}}
                 @if(Auth::check() && Auth::user()->role === 'admin')
-                    <div class="flex gap-3 pt-4">
-                        @if(!$event->isFinished())
+                    <div class="flex gap-3 pt-4">   
+                        @if(!$event->isFinished() && !$event->isInProgress())
+
                             <a href="/events/{{ $event->id }}/edit"
-                                style="background:#f59e0b;color:white;padding:8px 14px;border-radius:6px;display:inline-block;">
+                            style="background:#f59e0b;color:white;padding:8px 14px;border-radius:6px;display:inline-block;">
                                 Modifica
                             </a>
+
+                        @else
+
+                            <button
+                                type="button"
+                                disabled
+                                title="{{ $event->isFinished() ? 'L\'evento è concluso' : 'L\'evento è in corso' }}"
+                                style="background:#d1d5db;color:#6b7280;padding:8px 14px;border-radius:6px;cursor:not-allowed;">
+                                Modifica
+                            </button>
+
                         @endif
-                        <form method="POST" action="/events/{{ $event->id }}">
-                            @csrf
-                            @method('DELETE')
-                            <button onclick="return confirm('Sei sicuro di voler eliminare questo evento?')"
-                                style="background:#374151;color:white;padding:8px 14px;border-radius:6px;">
+
+                        @if(!$event->isInProgress())
+
+                            <form method="POST" action="/events/{{ $event->id }}">
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    onclick="return confirm('Sei sicuro di voler eliminare questo evento?')"
+                                    style="background:#374151;color:white;padding:8px 14px;border-radius:6px;">
+                                    Elimina
+                                </button>
+                            </form>
+
+                        @else
+
+                            <button
+                                type="button"
+                                disabled
+                                title="{{ $event->isFinished() ? 'L\'evento è concluso' : 'L\'evento è in corso' }}"
+                                style="background:#d1d5db;color:#6b7280;padding:8px 14px;border-radius:6px;cursor:not-allowed;">
                                 Elimina
                             </button>
-                        </form>
 
+                        @endif
                     </div>
                 @endif
 
