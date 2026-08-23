@@ -16,6 +16,11 @@ class EventController extends Controller
         $query = Event::with('users')
             ->orderBy('event_date');
 
+
+        if ($filter !== 'history') {
+            $query->WhereDate('event_date', '>=', today());
+        }    
+        
         // SEARCH
         if ($search) {
 
@@ -36,10 +41,7 @@ class EventController extends Controller
 
                 $query->whereDate('event_date', '>', today())
                     ->whereDate('registration_deadline', '<', today());
-
-            } elseif ($statusSearch === 'concluso') {
-
-                $query->whereDate('event_date', '<', today());
+                    
             } elseif ($statusSearch === 'in corso') {
 
                 $query->whereDate('event_date', '=', today());
@@ -87,6 +89,10 @@ class EventController extends Controller
             $query->whereHas('users', function ($q) {
                 $q->where('users.id', auth()->id());
             });
+        }
+
+        if ($filter === 'history') {
+            $query->whereDate('event_date', '<', today());
         }
 
         $events = $query->paginate(10)->withQueryString();

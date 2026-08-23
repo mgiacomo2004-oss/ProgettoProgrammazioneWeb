@@ -47,6 +47,10 @@
                          I miei eventi
                         </a>
                     @endif
+                    <a href="/events?filter=history" class="px-2 py-1 rounded
+       {{ $filter === 'history' ? 'font-bold underline text-gray-900' : 'text-gray-600 hover:text-gray-900' }}">
+                         Storico
+                    </a>
 
                 </div>
                 {{-- SEARCH + ADMIN  --}} 

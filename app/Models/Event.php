@@ -52,7 +52,8 @@ class Event extends Model
     {
         return !$this->isFinished()
             && !$this->isClosed()
-            && !$this->isFull();
+            && !$this->isFull()
+            && !$this->isInProgress();
     }
 
     public function getStatus()
