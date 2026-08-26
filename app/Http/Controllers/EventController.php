@@ -136,15 +136,15 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
 
-        $data = $this->validateEvent($request);
-
         $event = Event::findOrFail($id);
 
         if ($event->isFinished() || $event->isInProgress()) {
             return redirect('/events')
                 ->with('error', 'Non puoi modificare un evento concluso o in corso.');
         }
-
+        
+        $data = $this->validateEvent($request, $event);
+        
         $oldTitle = $event->title;
 
         $event->update($data);
@@ -223,15 +223,23 @@ class EventController extends Controller
 
         return back()->with('success', 'Iscrizione annullata con successo.');
     }
-    private function validateEvent(Request $request)
+    private function validateEvent(Request $request, ?Event $event = null)
     {
+        $currentParticipants = $event
+            ? $event->users()->count()
+            : 0;
+
         return $request->validate([
             'title' => 'required|max:255',
             'description' => 'required',
             'location' => 'required|max:255',
             'event_date' => 'required|date|after:today',
             'registration_deadline' => 'required|date|before_or_equal:event_date',
-            'max_participants' => 'required|integer|min:1',
+            'max_participants' => [
+                'required',
+                'integer',
+                'min:' . max(1, $currentParticipants),
+            ],
             'cost' => 'required|numeric|min:0',
         ]);
     }

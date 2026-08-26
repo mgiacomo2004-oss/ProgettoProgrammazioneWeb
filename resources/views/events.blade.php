@@ -31,12 +31,12 @@
                 <div class="flex gap-4 mb-4 text-sm">
 
                     
-                    @if(auth()->user()?->role !== 'admin')
+                    
                         <a href="/events" class="px-2 py-1 rounded
        {{ !$filter ? 'font-bold underline text-gray-900' : 'text-gray-600 hover:text-gray-900' }}">
                         Tutti
                          </a>
-
+                    @if(auth()->user()?->role !== 'admin')
                          <a href="/events?filter=available" class="px-2 py-1 rounded
        {{ $filter === 'available' ? 'font-bold underline text-gray-900' : 'text-gray-600 hover:text-gray-900' }}">
                           Disponibili

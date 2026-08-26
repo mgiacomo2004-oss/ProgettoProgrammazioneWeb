@@ -10,6 +10,16 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
 
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                
+                @if($errors->any())
+                    <div class="mb-4 p-4 rounded bg-red-100 text-red-800">
+                        <ul class="list-disc ml-5">
+                            @foreach($errors->all() as $error)
+                                <li class="text-red-800">{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif      
 
                 <form method="POST" action="/events/{{ $event->id }}" class="space-y-6">
 
