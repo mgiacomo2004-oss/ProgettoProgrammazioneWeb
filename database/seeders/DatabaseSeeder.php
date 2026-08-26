@@ -76,9 +76,9 @@ class DatabaseSeeder extends Seeder
 
         $closedEvent->users()->attach($user1->id);
 
-        // 4. EVENTO IN CORSO 
+        // 4. EVENTO ANULATO 
         Event::create([
-            'title' => 'Evento In Corso',
+            'title' => 'Evento anullato',
             'description' => 'Evento di esempio che si svolge oggi.',
             'location' => 'Bergamo',
             'event_date' => today(),

@@ -21,7 +21,7 @@ class EventController extends Controller
             $query->where(function ($q) {
                 $q->whereDate('event_date', '>', today())
                 ->orWhere(function ($q) {
-                    $q->whereDate('event_date', '=', today())
+                    $q->whereDate('event_date', today())
                         ->whereHas('users');
                 });
             });
@@ -35,7 +35,7 @@ class EventController extends Controller
                 $query->whereDate('event_date', '>', today())
                     ->where(function ($q) {
                         $q->whereNull('registration_deadline')
-                            ->orWhereDate('registration_deadline', '>=', today());
+                            ->orWhere('registration_deadline', '>=', today());
                     })
                     ->whereRaw('(
                 select count(*)
@@ -46,11 +46,12 @@ class EventController extends Controller
             } elseif ($statusSearch === 'chiuso') {
 
                 $query->whereDate('event_date', '>', today())
-                    ->whereDate('registration_deadline', '<', today());
+                    ->where('registration_deadline', '<', today());
                     
             } elseif ($statusSearch === 'in corso') {
 
-                $query->whereDate('event_date', '=', today());
+                $query->whereDate('event_date', today())
+                        ->whereHas('users');
             } elseif ($statusSearch === 'pieno') {
 
                 $query->whereRaw('(
@@ -58,6 +59,24 @@ class EventController extends Controller
                     from event_user
                     where event_user.event_id = events.id
                 ) >= events.max_participants');
+            
+            } elseif ($statusSearch === 'annullato') {
+
+                if ($filter === 'history') {
+                    $query->whereDate('event_date', today())
+                       ->whereDoesntHave('users');
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+
+                } elseif ($statusSearch === 'concluso') {
+
+    
+                if ($filter === 'history') {
+                    $query->whereDate('event_date', '<', today());
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
 
             } else {
 
@@ -101,7 +120,7 @@ class EventController extends Controller
             $query->where(function ($q) {
                 $q->whereDate('event_date', '<', today())
                 ->orWhere(function ($q) {
-                    $q->whereDate('event_date', '=', today())
+                    $q->whereDate('event_date', today())
                         ->whereDoesntHave('users');
                 });
             });
@@ -136,9 +155,9 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::findOrFail($id);
-        if ($event->isFinished() || $event->isInProgress()) {
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso o in corso.');
+                ->with('error', 'Non puoi modificare un evento concluso, in corso o annullato.');
         }
         return view('edit-event', [
             'event' => $event
@@ -150,9 +169,9 @@ class EventController extends Controller
 
         $event = Event::findOrFail($id);
 
-        if ($event->isFinished() || $event->isInProgress()) {
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso o in corso.');
+                ->with('error', 'Non puoi modificare un evento concluso, in corso o annullato.');
         }
         
         $data = $this->validateEvent($request, $event);
@@ -204,8 +223,8 @@ class EventController extends Controller
             return back()->with('error', 'Operazione non consentita.');
         }
 
-        if ($event->isFinished() || $event->isInProgress()) {
-            return back()->with('error', 'Non puoi iscriverti a un evento concluso o in corso.');
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
+            return back()->with('error', 'Non puoi iscriverti a un evento concluso, in corso o annullato.');
         }
 
         if ($event->isClosed()) {
@@ -231,8 +250,8 @@ class EventController extends Controller
 
         $user = auth()->user();
 
-        if ($event->isInProgress() || $event->isFinished()) {
-            return back()->with('error', 'non puoi disiscriverti ad un evento in corso o concluso');
+        if ($event->isInProgress() || $event->isFinished() || $event->isCancelled()) {
+            return back()->with('error', 'non puoi disiscriverti ad un evento in corso, concluso o annullato.');
         }
 
         $event->users()->detach($user->id);

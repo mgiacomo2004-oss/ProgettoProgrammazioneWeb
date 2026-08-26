@@ -28,8 +28,12 @@ class Event extends Model
 
     public function isFinished()
     {
-        return $this->event_date->isBefore(today())
-            || ($this->event_date->isToday() && $this->users()->count() === 0);
+        return $this->event_date->isBefore(today());
+    }
+
+    public function isCancelled() 
+    {
+        return $this->event_date->isToday() && $this->users()->count() === 0;
     }
 
     public function isInProgress()
@@ -41,6 +45,7 @@ class Event extends Model
     public function isClosed()
     {
         return !$this->isFinished()
+            && !$this->isCancelled()
             && $this->registration_deadline
             && $this->registration_deadline->isPast();
     }
@@ -53,6 +58,7 @@ class Event extends Model
     public function isOpen()
     {
         return !$this->isFinished()
+            && !$this->isCancelled()
             && !$this->isClosed()
             && !$this->isFull()
             && !$this->isInProgress();
@@ -62,6 +68,10 @@ class Event extends Model
     {
         if ($this->isFinished()) {
             return 'finished';
+        }
+
+        if ($this->isCancelled()) {
+            return 'cancelled';
         }
 
         if ($this->isInProgress()) {
@@ -87,6 +97,7 @@ class Event extends Model
     {
         return match ($this->getStatus()) {
             'finished' => 'CONCLUSO',
+            'cancelled' => 'ANNULLATO',
             'full' => 'PIENO',
             'closed' => 'CHIUSO',
             'in_progress' => 'IN CORSO',
@@ -98,6 +109,7 @@ class Event extends Model
     {
         return match ($this->getStatus()) {
             'finished' => 'text-gray-600',
+            'cancelled' => 'text-gray-500',
             'full' => 'text-red-600',
             'closed' => 'text-orange-600',
             'in_progress' => 'text-blue-500',
