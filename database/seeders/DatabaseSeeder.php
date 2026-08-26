@@ -87,8 +87,8 @@ class DatabaseSeeder extends Seeder
             'cost' => 5,
         ]);
 
-        // 5. EVENTO CONCLUSO
-        Event::create([
+        // 5. EVENTO CONCLUSO CON 1 ISCRITTO
+        $finishedEvent = Event::create([
             'title' => 'Evento Concluso',
             'description' => 'Evento di esempio già terminato.',
             'location' => 'Mantova',
@@ -97,6 +97,8 @@ class DatabaseSeeder extends Seeder
             'max_participants' => 20,
             'cost' => 10,
         ]);
+
+        $finishedEvent->users()->attach($user1->id);
 
         // 6. EVENTO IN CORSO CON 1 ISCRITTO
         $inProgressEvent = Event::create([
