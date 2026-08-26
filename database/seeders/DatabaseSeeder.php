@@ -63,9 +63,9 @@ class DatabaseSeeder extends Seeder
             $user2->id,
         ]);
 
-        // 3. EVENTO CHIUSO
-        Event::create([
-            'title' => 'Evento Chiuso',
+        // 3. EVENTO CHIUSO CON 1 ISCRITTO
+        $closedEvent = Event::create([
+            'title' => 'Evento Chiuso - 1 iscritto',
             'description' => 'Evento di esempio con iscrizioni scadute.',
             'location' => 'Verona',
             'event_date' => now()->addDays(10),
@@ -74,7 +74,9 @@ class DatabaseSeeder extends Seeder
             'cost' => 20,
         ]);
 
-        // 4. EVENTO IN CORSO
+        $closedEvent->users()->attach($user1->id);
+
+        // 4. EVENTO IN CORSO 
         Event::create([
             'title' => 'Evento In Corso',
             'description' => 'Evento di esempio che si svolge oggi.',

@@ -231,6 +231,10 @@ class EventController extends Controller
 
         $user = auth()->user();
 
+        if ($event->isInProgress() || $event->isFinished()) {
+            return back()->with('error', 'non puoi disiscriverti ad un evento in corso o concluso');
+        }
+
         $event->users()->detach($user->id);
 
         return back()->with('success', 'Iscrizione annullata con successo.');

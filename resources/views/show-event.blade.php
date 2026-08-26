@@ -59,14 +59,25 @@
                                 <span style="color:#6b7280;font-weight:bold;">
                                     Evento concluso
                                 </span>
+                            @elseif($event->isInProgress()) 
+
+                                 <span style="color:#2563eb;font-weight:bold;">
+                                     Evento in corso
+                                </span>
 
                             @elseif($event->users->pluck('id')->contains(auth()->id()))
 
                                 <form method="POST" action="/events/{{ $event->id }}/leave">
                                     @csrf
-                                    <button style="background:#dc2626;color:white;padding:8px 14px;border-radius:6px;">
-                                        Annulla iscrizione
-                                    </button>
+                                    
+                                    <button
+                                    @if($event->isClosed())
+                                        onclick="return confirm('Attenzione: le iscrizioni sono chiuse. Se ti disiscrivi, non potrai più iscriverti a questo evento. Vuoi continuare?')"
+                                    @endif
+                                    style="background:#dc2626;color:white;padding:8px 14px;border-radius:6px;"
+                                     >
+                                     Annulla iscrizione
+                                     </button>
                                 </form>
 
                             @elseif($event->isClosed())
