@@ -18,9 +18,15 @@ class EventController extends Controller
 
 
         if ($filter !== 'history') {
-            $query->WhereDate('event_date', '>=', today());
-        }    
-        
+            $query->where(function ($q) {
+                $q->whereDate('event_date', '>', today())
+                ->orWhere(function ($q) {
+                    $q->whereDate('event_date', '=', today())
+                        ->whereHas('users');
+                });
+            });
+        } 
+                
         // SEARCH
         if ($search) {
 
@@ -92,7 +98,13 @@ class EventController extends Controller
         }
 
         if ($filter === 'history') {
-            $query->whereDate('event_date', '<', today());
+            $query->where(function ($q) {
+                $q->whereDate('event_date', '<', today())
+                ->orWhere(function ($q) {
+                    $q->whereDate('event_date', '=', today())
+                        ->whereDoesntHave('users');
+                });
+            });
         }
 
         $events = $query->paginate(10)->withQueryString();

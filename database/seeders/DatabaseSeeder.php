@@ -95,5 +95,18 @@ class DatabaseSeeder extends Seeder
             'max_participants' => 20,
             'cost' => 10,
         ]);
+
+        // 6. EVENTO IN CORSO CON 1 ISCRITTO
+        $inProgressEvent = Event::create([
+            'title' => 'Evento In Corso - 1 Iscritto',
+            'description' => 'Evento di esempio che si svolge oggi con un solo iscritto.',
+            'location' => 'Bergamo',
+            'event_date' => today(),
+            'registration_deadline' => today(),
+            'max_participants' => 20,
+            'cost' => 5,
+        ]);
+
+        $inProgressEvent->users()->attach($user1->id);
     }
 }

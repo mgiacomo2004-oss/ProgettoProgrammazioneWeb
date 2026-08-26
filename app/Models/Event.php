@@ -28,12 +28,14 @@ class Event extends Model
 
     public function isFinished()
     {
-        return $this->event_date->isBefore(today());
+        return $this->event_date->isBefore(today())
+            || ($this->event_date->isToday() && $this->users()->count() === 0);
     }
 
     public function isInProgress()
     {
-        return $this->event_date->isToday();
+        return $this->event_date->isToday() 
+            && $this->users()->count() > 0;
     }
 
     public function isClosed()
