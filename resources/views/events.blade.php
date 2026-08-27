@@ -9,7 +9,10 @@
     <div class="py-12">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
+            <div class="mb-4 text-right text-sm text-gray-600">
+                🕐 Ora corrente:
+                <span id="current-time" class="font-semibold text-gray-900"></span>
+            </div>
             @if(session('success'))
                 <div class="mb-4 p-4 rounded bg-green-100 text-green-800">
                     {{ session('success') }}
@@ -196,5 +199,20 @@
         </div>
 
     </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
 
+            const time = now.toLocaleTimeString('it-IT', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            document.getElementById('current-time').textContent = time;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
 </x-app-layout>

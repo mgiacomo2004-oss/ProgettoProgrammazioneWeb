@@ -72,39 +72,22 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
-      //EVENTO CHIUSO
-
-        $closedEvent = Event::create([
-            'title' => 'Evento Chiuso',
-            'description' => 'Evento futuro con iscrizioni scadute.',
-            'location' => 'Verona',
-            'event_date' => now()->addDays(10),
-            'start_time' => '18:00',
-            'end_time' => '21:00',
-            'registration_deadline' => today()->subDays(2),
-            'max_participants' => 20,
-            'cost' => 20,
-        ]);
-
-        $closedEvent->users()->attach($user1->id);
-
-
-        //EVENTO ANNULLATO
+      //EVENTO CHIUSO - DEADLINE OGGI
 
         Event::create([
-            'title' => 'Evento Annullato',
-            'description' => 'Evento in corso senza iscritti.',
-            'location' => 'Bergamo',
-            'event_date' => today(),
-            'start_time' => now()->subHour()->format('H:i'),
-            'end_time' => now()->addHour()->format('H:i'),
+            'title' => 'Evento Chiuso - Deadline Oggi',
+            'description' => 'La deadline è scaduta ieri notte.',
+            'location' => 'Brescia',
+            'event_date' => today()->addDays(3),
+            'start_time' => '18:00',
+            'end_time' => '20:00',
             'registration_deadline' => today(),
             'max_participants' => 20,
-            'cost' => 5,
+            'cost' => 8,
         ]);
 
 
-        //EVENTO IN CORSO
+        //EVENTO IN CORSO - CON ISCRITTO
 
         $inProgressEvent = Event::create([
             'title' => 'Evento In Corso',
@@ -117,20 +100,35 @@ class DatabaseSeeder extends Seeder
             'max_participants' => 20,
             'cost' => 5,
         ]);
-
         $inProgressEvent->users()->attach($user1->id);
 
 
-        //EVENTO CONCLUSO
-
-        $finishedEvent = Event::create([
-            'title' => 'Evento Concluso',
-            'description' => 'Evento terminato oggi.',
+        
+        // EVENTO CONCLUSO - TERMINATO POCO FA
+        $finishedToday = Event::create([
+            'title' => 'Evento Concluso - Oggi',
+            'description' => 'Evento terminato poco fa.',
             'location' => 'Mantova',
             'event_date' => today(),
-            'start_time' => now()->subHours(3)->format('H:i'),
-            'end_time' => now()->subHour()->format('H:i'),
-            'registration_deadline' => today()->subDays(2),
+            'start_time' => now()->subHours(2)->format('H:i'),
+            'end_time' => now()->subMinutes(5)->format('H:i'),
+            'registration_deadline' => today(),
+            'max_participants' => 20,
+            'cost' => 10,
+        ]);
+
+        $finishedToday->users()->attach($user1->id);
+
+
+        // EVENTO CONCLUSO - DATA PASSATA
+        $finishedEvent = Event::create([
+            'title' => 'Evento Concluso - Data Passata',
+            'description' => 'Evento terminato nei giorni precedenti.',
+            'location' => 'Mantova',
+            'event_date' => today()->subDays(5),
+            'start_time' => '18:00',
+            'end_time' => '21:00',
+            'registration_deadline' => today()->subDays(10),
             'max_participants' => 20,
             'cost' => 10,
         ]);
@@ -138,28 +136,27 @@ class DatabaseSeeder extends Seeder
         $finishedEvent->users()->attach($user1->id);
 
 
-        //EVENTO APERTO - DEADLINE OGGI
-
+        // EVENTO ANNULLATO - SENZA ISCRITTI
         Event::create([
-            'title' => 'Evento Aperto - Deadline Oggi',
-            'description' => 'Evento futuro con deadline fissata a oggi.',
-            'location' => 'Brescia',
-            'event_date' => today()->addDays(3),
-            'start_time' => '18:00',
-            'end_time' => '20:00',
+            'title' => 'Evento Annullato',
+            'description' => 'Evento di oggi senza iscritti.',
+            'location' => 'Bergamo',
+            'event_date' => today(),
+            'start_time' => now()->subHour()->format('H:i'),
+            'end_time' => now()->addMinutes(30)->format('H:i'),
             'registration_deadline' => today(),
             'max_participants' => 20,
-            'cost' => 8,
+            'cost' => 5,
         ]);
 
 
-        //EVENTO PIENO CON DEADLINE FUTURA
-
+      
+        // EVENTO PIENO + DEADLINE FUTURA
         $fullFutureEvent = Event::create([
             'title' => 'Evento Pieno - Deadline Futura',
-            'description' => 'Evento pieno con deadline ancora valida.',
+            'description' => 'Evento pieno ma con iscrizioni ancora teoricamente aperte.',
             'location' => 'Milano',
-            'event_date' => today()->addDays(5),
+            'event_date' => today()->addDays(10),
             'start_time' => '19:00',
             'end_time' => '21:00',
             'registration_deadline' => today()->addDays(2),
@@ -167,16 +164,15 @@ class DatabaseSeeder extends Seeder
             'cost' => 12,
         ]);
 
-        $fullFutureEvent->users()->attach($user2->id);
+        $fullFutureEvent->users()->attach($user1->id);
 
 
-        //EVENTO CHIUSO MOLTO LONTANO
-
+        // EVENTO CHIUSO - DATA MOLTO FUTURA
         Event::create([
             'title' => 'Evento Chiuso - Data Futura',
-            'description' => 'Evento molto futuro ma con iscrizioni già chiuse.',
+            'description' => 'Deadline già passata nonostante l’evento sia molto lontano.',
             'location' => 'Verona',
-            'event_date' => today()->addDays(30),
+            'event_date' => today()->addMonth(),
             'start_time' => '10:00',
             'end_time' => '12:00',
             'registration_deadline' => today()->subDay(),
@@ -184,19 +180,54 @@ class DatabaseSeeder extends Seeder
             'cost' => 25,
         ]);
 
-
-        //EVENTO FUTURO CON INIZIO VICINO 
+        /*
+        | test per le transizioni
+        */
+        
+        //EVENTO CHIUSO -> ANNULLATO
 
         Event::create([
             'title' => 'Evento - Inizio Vicino',
-            'description' => 'Evento che inizierà tra poco.',
+            'description' => 'Evento senza iscritti che sta per iniziare.',
             'location' => 'Brescia',
             'event_date' => today(),
-            'start_time' => now()->addMinutes(30)->format('H:i'),
-            'end_time' => now()->addHours(2)->format('H:i'),
+            'start_time' => now()->addMinutes(5)->format('H:i'),
+            'end_time' => now()->addMinutes(35)->format('H:i'),
             'registration_deadline' => today(),
             'max_participants' => 20,
             'cost' => 10,
         ]);
+
+        //EVENTO IN CORSO -> CONCLUSO
+
+        $endingEvent = Event::create([
+            'title' => 'Evento - Fine Vicina',
+            'description' => 'Evento in corso che sta per terminare.',
+            'location' => 'Bergamo',
+            'event_date' => today(),
+            'start_time' => now()->subMinutes(30)->format('H:i'),
+            'end_time' => now()->addMinutes(5)->format('H:i'),
+            'registration_deadline' => today(),
+            'max_participants' => 20,
+            'cost' => 5,
+        ]);
+
+        $endingEvent->users()->attach($user1->id);
+
+        //EVENTO CHIUSO -> IN CORSO
+
+        $startingEvent = Event::create([
+            'title' => 'Evento - Inizio Vicino con Iscritto',
+            'description' => 'Evento con un iscritto che sta per iniziare.',
+            'location' => 'Brescia',
+            'event_date' => today(),
+            'start_time' => now()->addMinutes(5)->format('H:i'),
+            'end_time' => now()->addMinutes(35)->format('H:i'),
+            'registration_deadline' => today(),
+            'max_participants' => 20,
+            'cost' => 10,
+        ]);
+
+        $startingEvent->users()->attach($user1->id);
     }
 }
