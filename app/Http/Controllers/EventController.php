@@ -71,38 +71,20 @@ class EventController extends Controller
         //TUTTI 
         if ($filter !== 'history') {
 
-            $query->whereNot(function ($q) use ($finished) {
-                $finished($q);
-            });
+            $query->whereNot($finished);
 
-            $query->whereNot(function ($q) use ($cancelled) {
-                $cancelled($q);
-            });
+            $query->whereNot($cancelled);
         }
 
         // SEARCH
         if ($search) {
             if ($statusSearch === 'aperto') {
 
-                $query->whereNot(function ($q) use ($finished) {
-                    $finished($q);
-                });
-
-                $query->whereNot(function ($q) use ($cancelled) {
-                    $cancelled($q);
-                });
-
-                $query->whereNot(function ($q) use ($inProgress) {
-                    $inProgress($q);
-                });
-
-                $query->whereNot(function ($q) use ($closed) {
-                    $closed($q);
-                });
-
-                $query->whereNot(function ($q) use ($full) {
-                    $full($q);
-                });
+                $query->whereNot($finished);
+                $query->whereNot($cancelled);
+                $query->whereNot($inProgress);
+                $query->whereNot($closed);
+                $query->whereNot($full);
 
             } elseif ($statusSearch === 'chiuso') {
 
@@ -142,25 +124,11 @@ class EventController extends Controller
         //filtro DISPONIBILI 
         if ($filter === 'available') {
 
-            $query->whereNot(function ($q) use ($finished) {
-                $finished($q);
-            });
-
-            $query->whereNot(function ($q) use ($cancelled) {
-                $cancelled($q);
-            });
-
-            $query->whereNot(function ($q) use ($inProgress) {
-                $inProgress($q);
-            });
-
-            $query->whereNot(function ($q) use ($closed) {
-                $closed($q);
-            });
-
-            $query->whereNot(function ($q) use ($full) {
-                $full($q);
-            });
+            $query->whereNot($finished);
+            $query->whereNot($cancelled);
+            $query->whereNot($inProgress);
+            $query->whereNot($closed);
+            $query->whereNot($full);
         }
         
         if ($filter === 'mine') {
@@ -169,13 +137,8 @@ class EventController extends Controller
                 $q->where('users.id', auth()->id());
             });
 
-            $query->whereNot(function ($q) use ($finished) {
-                $finished($q);
-            });
-
-            $query->whereNot(function ($q) use ($cancelled) {
-                $cancelled($q);
-            });
+            $query->whereNot($finished);
+            $query->whereNot($cancelled);
         }
 
         if ($filter === 'history') {
