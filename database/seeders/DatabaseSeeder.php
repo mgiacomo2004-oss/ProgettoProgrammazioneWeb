@@ -52,26 +52,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
-       //EVENTO PIENO
-
-        $fullEvent = Event::create([
-            'title' => 'Evento Pieno',
-            'description' => 'Evento futuro con tutti i posti occupati.',
-            'location' => 'Milano',
-            'event_date' => now()->addDays(15),
-            'start_time' => '20:00',
-            'end_time' => '23:00',
-            'registration_deadline' => today()->addDays(7),
-            'max_participants' => 2,
-            'cost' => 15,
-        ]);
-
-        $fullEvent->users()->attach([
-            $user1->id,
-            $user2->id,
-        ]);
-
-
       //EVENTO CHIUSO - DEADLINE OGGI
 
         Event::create([
@@ -229,5 +209,24 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $startingEvent->users()->attach($user1->id);
+
+        //EVENTO PIENO -> corso
+
+        $fullEvent = Event::create([
+            'title' => 'Evento Pieno - Inizio Vicino',
+            'description' => 'Evento pieno che sta per iniziare.',
+            'location' => 'Milano',
+            'event_date' => today(),
+            'start_time' => now()->addMinutes(5)->format('H:i'),
+            'end_time' => now()->addMinutes(35)->format('H:i'),
+            'registration_deadline' => today(),
+            'max_participants' => 2,
+            'cost' => 15,
+        ]);
+
+        $fullEvent->users()->attach([
+            $user1->id,
+            $user2->id,
+        ]);
     }
 }
