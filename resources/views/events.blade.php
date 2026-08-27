@@ -145,6 +145,8 @@
 
                                     <td class="px-6 py-4 text-sm text-gray-700">
                                         {{ $event->formattedEventDate() }}
+                                        <br>
+                                        {{ $event->start_time }} - {{ $event->end_time }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-700">
                                         {{ $event->formattedRegistrationDeadline() }}

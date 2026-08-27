@@ -49,6 +49,27 @@
                         <input type="date" name="event_date" value="{{ $event->event_date->format('Y-m-d') }}"
                             class="form-control">
                     </div>
+                    
+                    <div>
+                        <label class="form-label">Ora inizio</label>
+                        <input
+                            type="time"
+                            name="start_time"
+                            value="{{ $event->start_time }}"
+                            class="form-control"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="form-label">Ora fine</label>
+                        <input
+                            type="time"
+                            name="end_time"
+                            value="{{ $event->end_time }}"
+                            class="form-control"
+                        >
+                    </div>
+                    
                     <div class="mb-3">
                         <label class="form-label">Termine iscrizione</label>
                         <input type="date" name="registration_deadline"

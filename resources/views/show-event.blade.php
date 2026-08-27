@@ -33,7 +33,11 @@
 
                     <p><span class="font-semibold">Descrizione:</span><br>{{ $event->description }}</p>
                     <p><span class="font-semibold">Luogo:</span> {{ $event->location }}</p>
-                    <p><span class="font-semibold">Data:</span> {{ $event->formattedEventDate() }}</p>
+                    <p>
+                        <span class="font-semibold">Data:</span> {{ $event->formattedEventDate() }}
+                        <br>
+                        <span class="font-semibold">Orario:</span> {{ $event->start_time }} - {{ $event->end_time }}
+                    </p>
                     <p><span class="font-semibold">Termine iscrizione:</span> {{ $event->formattedRegistrationDeadline() }}</span>
                     </p>
                     <p><span class="font-semibold">Max partecipanti:</span> {{ $event->max_participants }}</p>

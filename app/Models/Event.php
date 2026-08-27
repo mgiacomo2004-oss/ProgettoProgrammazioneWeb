@@ -11,6 +11,8 @@ class Event extends Model
         'description',
         'location',
         'event_date',
+        'start_time',
+        'end_time',
         'registration_deadline',
         'max_participants',
         'cost'
@@ -28,17 +30,20 @@ class Event extends Model
 
     public function isFinished()
     {
-        return $this->event_date->isBefore(today());
+        return now()->greaterThanOrEqualTo($this->endDateTime());
     }
 
     public function isCancelled() 
     {
-        return $this->event_date->isToday() && $this->users()->count() === 0;
+        return now()->greaterThanOrEqualTo($this->startDateTime())
+            && now()->lessThan($this->endDateTime())
+            && $this->users()->count() === 0;
     }
 
     public function isInProgress()
     {
-        return $this->event_date->isToday() 
+        return now()->greaterThanOrEqualTo($this->startDateTime())
+            && now()->lessThan($this->endDateTime())
             && $this->users()->count() > 0;
     }
 
@@ -47,7 +52,8 @@ class Event extends Model
         return !$this->isFinished()
             && !$this->isCancelled()
             && $this->registration_deadline
-            && $this->registration_deadline->isPast();
+            && now()->greaterThanOrEqualTo($this->registration_deadline->copy()->startOfDay())
+            && now()->lessThan($this->startDateTime());
     }
 
     public function isFull()
@@ -125,6 +131,16 @@ class Event extends Model
     public function formattedRegistrationDeadline()
     {
         return $this->registration_deadline?->format('d/m/Y');
+    }
+
+    private function startDateTime()
+    {
+        return $this->event_date->copy()->setTimeFromTimeString($this->start_time);
+    }
+
+    private function endDateTime()
+    {
+        return $this->event_date->copy()->setTimeFromTimeString($this->end_time);
     }
 
 }

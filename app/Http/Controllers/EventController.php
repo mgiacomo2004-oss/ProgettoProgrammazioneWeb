@@ -13,70 +13,116 @@ class EventController extends Controller
         $filter = request()->query('filter');
         $search = request()->query('search');
         $statusSearch = strtolower(trim($search));
+
+        $now = now();
+        $today = today();
+        $currentTime = $now->format('H:i:s');
+
         $query = Event::with('users')
-            ->orderBy('event_date');
+            ->orderBy('event_date')
+            ->orderBy('start_time');
 
 
-        if ($filter !== 'history') {
-            $query->where(function ($q) {
-                $q->whereDate('event_date', '>', today())
-                ->orWhere(function ($q) {
-                    $q->whereDate('event_date', today())
-                        ->whereHas('users');
-                });
+        //stato CONCLUSO
+        $finished = function ($q) use ($today, $currentTime) {
+            $q->whereDate('event_date', '<', $today)
+                ->orWhere(function ($q) use ($today, $currentTime) {
+                    $q->whereDate('event_date', $today)
+                        ->whereTime('end_time', '<=', $currentTime);
             });
-        } 
-                
-        // SEARCH
-        if ($search) {
+        };
 
-            if ($statusSearch === 'aperto') {
+        //stato ANNULLATO
+        $cancelled = function ($q) use ($today, $currentTime) {
+            $q->whereDate('event_date', $today)
+                ->whereTime('start_time', '<=', $currentTime)
+                ->whereTime('end_time', '>', $currentTime)
+                ->whereDoesntHave('users');
+        };
 
-                $query->whereDate('event_date', '>', today())
-                    ->where(function ($q) {
-                        $q->whereNull('registration_deadline')
-                            ->orWhere('registration_deadline', '>=', today());
-                    })
-                    ->whereRaw('(
+        //stato IN CORSO
+        $inProgress = function ($q) use ($today, $currentTime) {
+            $q->whereDate('event_date', $today)
+                ->whereTime('start_time', '<=', $currentTime)
+                ->whereTime('end_time', '>', $currentTime)
+                ->whereHas('users');
+        };
+
+        //stato CHIUSO
+        $closed = function ($q) use ($today, $currentTime) {
+            $q->whereDate('registration_deadline', '<=', $today)
+                ->where(function ($q) use ($today, $currentTime) {
+                    $q->whereDate('event_date', '>', $today)
+                        ->orWhere(function ($q) use ($today, $currentTime) {
+                            $q->whereDate('event_date', $today)
+                                ->whereTime('start_time', '>', $currentTime);
+                        });
+                });
+        };
+
+        //stato PIENO
+        $full = function ($q) {
+            $q->whereRaw('(
                 select count(*)
                 from event_user
                 where event_user.event_id = events.id
-            ) < events.max_participants');
+            ) >= events.max_participants');
+        };
+        //TUTTI 
+        if ($filter !== 'history') {
+
+            $query->whereNot(function ($q) use ($finished) {
+                $finished($q);
+            });
+
+            $query->whereNot(function ($q) use ($cancelled) {
+                $cancelled($q);
+            });
+        }
+
+        // SEARCH
+        if ($search) {
+            if ($statusSearch === 'aperto') {
+
+                $query->whereNot(function ($q) use ($finished) {
+                    $finished($q);
+                });
+
+                $query->whereNot(function ($q) use ($cancelled) {
+                    $cancelled($q);
+                });
+
+                $query->whereNot(function ($q) use ($inProgress) {
+                    $inProgress($q);
+                });
+
+                $query->whereNot(function ($q) use ($closed) {
+                    $closed($q);
+                });
+
+                $query->whereNot(function ($q) use ($full) {
+                    $full($q);
+                });
 
             } elseif ($statusSearch === 'chiuso') {
 
-                $query->whereDate('event_date', '>', today())
-                    ->where('registration_deadline', '<', today());
-                    
+                $query->where($closed);
+
             } elseif ($statusSearch === 'in corso') {
 
-                $query->whereDate('event_date', today())
-                        ->whereHas('users');
+                $query->where($inProgress);
+
             } elseif ($statusSearch === 'pieno') {
 
-                $query->whereRaw('(
-                    select count(*)
-                    from event_user
-                    where event_user.event_id = events.id
-                ) >= events.max_participants');
-            
+                $query->where($full);
+
             } elseif ($statusSearch === 'annullato') {
 
-                if ($filter === 'history') {
-                    $query->whereDate('event_date', today())
-                       ->whereDoesntHave('users');
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
+                $query->where($cancelled);
 
-                } elseif ($statusSearch === 'concluso') {
+            } elseif ($statusSearch === 'concluso') {
 
-    
-                if ($filter === 'history') {
-                    $query->whereDate('event_date', '<', today());
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
+                $query->where($finished);
 
             } else {
 
@@ -89,40 +135,54 @@ class EventController extends Controller
                         ->orWhere('cost', 'like', "%{$search}%")
                         ->orWhere('max_participants', 'like', "%{$search}%");
                 });
-
             }
+    
         }
-        // FILTER AVAILABLE
+
+        //filtro DISPONIBILI 
         if ($filter === 'available') {
 
-            $query->whereDate('event_date', '>', today())
+            $query->whereNot(function ($q) use ($finished) {
+                $finished($q);
+            });
 
-                ->where(function ($q) {
-                    $q->whereNull('registration_deadline')
-                        ->orWhereDate('registration_deadline', '>=', today());
-                })
+            $query->whereNot(function ($q) use ($cancelled) {
+                $cancelled($q);
+            });
 
-                ->whereRaw('(
-            select count(*)
-            from event_user
-            where event_user.event_id = events.id
-        ) < events.max_participants');
+            $query->whereNot(function ($q) use ($inProgress) {
+                $inProgress($q);
+            });
+
+            $query->whereNot(function ($q) use ($closed) {
+                $closed($q);
+            });
+
+            $query->whereNot(function ($q) use ($full) {
+                $full($q);
+            });
         }
-
-        // FILTER MINE
+        
         if ($filter === 'mine') {
+
             $query->whereHas('users', function ($q) {
                 $q->where('users.id', auth()->id());
+            });
+
+            $query->whereNot(function ($q) use ($finished) {
+                $finished($q);
+            });
+
+            $query->whereNot(function ($q) use ($cancelled) {
+                $cancelled($q);
             });
         }
 
         if ($filter === 'history') {
-            $query->where(function ($q) {
-                $q->whereDate('event_date', '<', today())
-                ->orWhere(function ($q) {
-                    $q->whereDate('event_date', today())
-                        ->whereDoesntHave('users');
-                });
+
+            $query->where(function ($q) use ($finished, $cancelled) {
+                $q->where($finished)
+                ->orWhere($cancelled);
             });
         }
 
@@ -268,13 +328,20 @@ class EventController extends Controller
             'title' => 'required|max:255',
             'description' => 'required',
             'location' => 'required|max:255',
+            
             'event_date' => 'required|date|after:today',
+            
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            
             'registration_deadline' => 'required|date|before_or_equal:event_date',
+            
             'max_participants' => [
                 'required',
                 'integer',
                 'min:' . max(1, $currentParticipants),
             ],
+            
             'cost' => 'required|numeric|min:0',
         ]);
     }
