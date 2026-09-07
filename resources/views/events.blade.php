@@ -209,7 +209,9 @@
                 second: '2-digit'
             });
 
+            {{-- cerca nel documento HTML l'oggetto con id = 'current-time' --}}
             document.getElementById('current-time').textContent = time;
+
         }
 
         updateClock();
