@@ -30,7 +30,7 @@
                 @php
                     $filter = request()->query('filter');
                 @endphp
-
+                {{-- accedi al request HTTP globale attuale ed estrai il value di filter --}}
                 <div class="flex gap-4 mb-4 text-sm">
 
                     
