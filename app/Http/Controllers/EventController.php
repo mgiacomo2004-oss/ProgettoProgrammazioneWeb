@@ -283,6 +283,7 @@ class EventController extends Controller
     }
     private function validateEvent(Request $request, ?Event $event = null)
     {
+        //event può essere null nel caso che questo metodo sia chiamato durante la creazione di un evento
         $currentParticipants = $event
             ? $event->users()->count()
             : 0;
