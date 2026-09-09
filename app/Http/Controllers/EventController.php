@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Event;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -178,7 +178,7 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::findOrFail($id);
-        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled() || $event->isClosed()) {
             return redirect('/events')
                 ->with('error', 'Non puoi modificare un evento concluso, in corso, annullato o chiuso.');
         }
@@ -238,33 +238,35 @@ class EventController extends Controller
 
     public function join($id)
     {
-        $event = Event::with('users')->findOrFail($id);
+        return DB::transaction(function () use ($id) {
+            // Blocca la riga dell'evento per evitare iscrizioni contemporanee che superino max_participants
+            $event = Event::where('id', $id)->lockForUpdate()->firstOrFail();
+            $user = auth()->user();
 
-        $user = auth()->user();
+            if (!$user || $user->role === 'admin') {
+                return back()->with('error', 'Operazione non consentita.');
+            }
 
-        if (!$user || $user->role === 'admin') {
-            return back()->with('error', 'Operazione non consentita.');
-        }
+            if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
+                return back()->with('error', 'Non puoi iscriverti a un evento concluso, in corso o annullato.');
+            }
 
-        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
-            return back()->with('error', 'Non puoi iscriverti a un evento concluso, in corso o annullato.');
-        }
+            if ($event->isClosed()) {
+                return back()->with('error', 'Termine iscrizioni scaduto.');
+            }
 
-        if ($event->isClosed()) {
-            return back()->with('error', 'Termine iscrizioni scaduto.');
-        }
+            if ($event->users()->where('users.id', $user->id)->exists()) {
+                return back()->with('error', 'Sei già iscritto a questo evento.');
+            }
 
-        if ($event->users->contains($user->id)) {
-            return back()->with('error', 'Sei già iscritto a questo evento.');
-        }
+            if ($event->users()->count() >= $event->max_participants) {
+                return back()->with('error', 'Evento pieno.');
+            }
 
-        if ($event->isFull()) {
-            return back()->with('error', 'Evento pieno.');
-        }
+            $event->users()->attach($user->id);
 
-        $event->users()->attach($user->id);
-
-        return back()->with('success', 'Iscrizione avvenuta con successo.');
+            return back()->with('success', 'Iscrizione avvenuta con successo.');
+        });
     }
 
     public function leave($id)
