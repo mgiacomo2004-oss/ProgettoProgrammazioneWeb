@@ -298,7 +298,12 @@ class EventController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             
-            'registration_deadline' => 'required|date|before_or_equal:event_date',
+            'registration_deadline' => [
+                'required',
+                'date',
+                'after:today',
+                'before_or_equal:event_date',
+            ],
             
             'max_participants' => [
                 'required',
@@ -336,6 +341,7 @@ class EventController extends Controller
         'registration_deadline.required' => 'Il termine per le iscrizioni è obbligatorio.',
         'registration_deadline.date' => 'Il termine per le iscrizioni non è valido.',
         'registration_deadline.before_or_equal' => 'Il termine per le iscrizioni deve essere precedente o uguale alla data dell\'evento.',
+        'registration_deadline.after' => 'Il termine per le iscrizioni deve essere successivo a oggi.',
 
         // Numero massimo partecipanti
         'max_participants.required' => 'Il numero massimo di partecipanti è obbligatorio.',
