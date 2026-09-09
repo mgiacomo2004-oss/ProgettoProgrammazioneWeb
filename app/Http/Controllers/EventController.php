@@ -307,6 +307,45 @@ class EventController extends Controller
             ],
             
             'cost' => 'required|numeric|min:0',
+        ],
+        [
+            // Titolo
+        'title.required' => 'Il titolo è obbligatorio.',
+        'title.max' => 'Il titolo non può superare i 255 caratteri.',
+
+        // Descrizione
+        'description.required' => 'La descrizione è obbligatoria.',
+
+        // Luogo
+        'location.required' => 'Il luogo è obbligatorio.',
+        'location.max' => 'Il luogo non può superare i 255 caratteri.',
+
+        // Data evento
+        'event_date.required' => 'La data dell\'evento è obbligatoria.',
+        'event_date.date' => 'La data dell\'evento non è valida.',
+        'event_date.after' => 'La data dell\'evento deve essere successiva a oggi.',
+
+        // Ora inizio
+        'start_time.required' => 'L\'ora di inizio è obbligatoria.',
+
+        // Ora fine
+        'end_time.required' => 'L\'ora di fine è obbligatoria.',
+        'end_time.after' => 'L\'ora di fine deve essere successiva all\'ora di inizio.',
+
+        // Termine iscrizione
+        'registration_deadline.required' => 'Il termine per le iscrizioni è obbligatorio.',
+        'registration_deadline.date' => 'Il termine per le iscrizioni non è valido.',
+        'registration_deadline.before_or_equal' => 'Il termine per le iscrizioni deve essere precedente o uguale alla data dell\'evento.',
+
+        // Numero massimo partecipanti
+        'max_participants.required' => 'Il numero massimo di partecipanti è obbligatorio.',
+        'max_participants.integer' => 'Il numero massimo di partecipanti deve essere un numero intero.',
+        'max_participants.min' => 'Il numero massimo di partecipanti non può essere inferiore al numero di partecipanti già iscritti.',
+
+        // Costo
+        'cost.required' => 'Il costo è obbligatorio.',
+        'cost.numeric' => 'Il costo deve essere un numero.',
+        'cost.min' => 'Il costo non può essere negativo.',
         ]);
     }
 }
