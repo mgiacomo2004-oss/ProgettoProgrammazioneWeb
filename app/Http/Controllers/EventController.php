@@ -25,19 +25,35 @@ class EventController extends Controller
 
         //stato CONCLUSO
         $finished = function ($q) use ($today, $currentTime) {
-            $q->whereDate('event_date', '<', $today)
-                ->orWhere(function ($q) use ($today, $currentTime) {
-                    $q->whereDate('event_date', $today)
+            $q->whereHas('users') 
+            ->where(function ($q) use ($today, $currentTime) {
+                $q->whereDate('event_date', '<', $today)
+                    ->orWhere(function ($q) use ($today, $currentTime) {
+                        $q->whereDate('event_date', $today)
                         ->whereTime('end_time', '<=', $currentTime);
+                    });
             });
         };
 
-        //stato ANNULLATO
+        // stato ANNULLATO: L'evento è iniziato/passato SENZA alcun iscritto
         $cancelled = function ($q) use ($today, $currentTime) {
-            $q->whereDate('event_date', $today)
-                ->whereTime('start_time', '<=', $currentTime)
-                ->whereTime('end_time', '>', $currentTime)
-                ->whereDoesntHave('users');
+            $q->whereDoesntHave('users') 
+            ->where(function ($q) use ($today, $currentTime) {
+                // L'evento è in corso oggi senza iscritti
+                $q->where(function ($sub) use ($today, $currentTime) {
+                    $sub->whereDate('event_date', $today)
+                        ->whereTime('start_time', '<=', $currentTime)
+                        ->whereTime('end_time', '>', $currentTime);
+                })
+                // oppure L'evento è già terminato (data passata o oggi dopo end_time) senza iscritti
+                ->orWhere(function ($sub) use ($today, $currentTime) {
+                    $sub->whereDate('event_date', '<', $today)
+                        ->orWhere(function ($q2) use ($today, $currentTime) {
+                            $q2->whereDate('event_date', $today)
+                                ->whereTime('end_time', '<=', $currentTime);
+                        });
+                });
+            });
         };
 
         //stato IN CORSO
@@ -178,9 +194,9 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = Event::findOrFail($id);
-        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled() || $event->isClosed()) {
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso, in corso, annullato o chiuso.');
+                ->with('error', 'Non puoi modificare un evento concluso, in corso o annullato.');
         }
         return view('edit-event', [
             'event' => $event
@@ -192,9 +208,9 @@ class EventController extends Controller
 
         $event = Event::findOrFail($id);
 
-        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled() || $event->isClosed()) {
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso, in corso, annullato o chiuso.');
+                ->with('error', 'Non puoi modificare un evento concluso, in corso o annullato.');
         }
         
         $data = $this->validateEvent($request, $event);
@@ -289,31 +305,25 @@ class EventController extends Controller
         $currentParticipants = $event
             ? $event->users()->count()
             : 0;
+        
+        // Estrazione pulita delle date per il confronto
+        $dbEventDate = $event ? date('Y-m-d', strtotime($event->event_date)) : null;
+        $dbDeadline  = $event ? date('Y-m-d', strtotime($event->registration_deadline)) : null;
+
+        // Se la data cambia (o è un nuovo evento), deve essere da OGGI in poi (after_or_equal)
+        $afterEventDate = (!$event || $request->event_date !== $dbEventDate) ? '|after_or_equal:today' : '';
+        $afterDeadline  = (!$event || $request->registration_deadline !== $dbDeadline) ? '|after_or_equal:today' : '';
 
         return $request->validate([
-            'title' => 'required|max:255',
-            'description' => 'required',
-            'location' => 'required|max:255',
-            
-            'event_date' => 'required|date|after:today',
-            
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            
-            'registration_deadline' => [
-                'required',
-                'date',
-                'after:today',
-                'before_or_equal:event_date',
-            ],
-            
-            'max_participants' => [
-                'required',
-                'integer',
-                'min:' . max(1, $currentParticipants),
-            ],
-            
-            'cost' => 'required|numeric|min:0',
+            'title'                 => 'required|max:255',
+            'description'           => 'required',
+            'location'              => 'required|max:255',
+            'event_date'            => 'required|date' . $afterEventDate,
+            'start_time'            => 'required|date_format:H:i',
+            'end_time'              => 'required|date_format:H:i|after:start_time',
+            'registration_deadline' => 'required|date|before_or_equal:event_date' . $afterDeadline,
+            'max_participants'      => 'required|integer|min:' . max(1, $currentParticipants),
+            'cost'                  => 'required|numeric|min:0',
         ],
         [
             // Titolo

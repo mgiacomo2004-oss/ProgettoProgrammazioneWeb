@@ -30,13 +30,12 @@ class Event extends Model
 
     public function isFinished()
     {
-        return now()->greaterThanOrEqualTo($this->endDateTime());
+        return now()->greaterThanOrEqualTo($this->endDateTime()) && $this->users()->count() > 0;
     }
 
     public function isCancelled() 
     {
         return now()->greaterThanOrEqualTo($this->startDateTime())
-            && now()->lessThan($this->endDateTime())
             && $this->users()->count() === 0;
     }
 

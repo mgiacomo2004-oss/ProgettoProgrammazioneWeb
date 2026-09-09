@@ -150,7 +150,7 @@
                 {{-- azioni admin --}}
                 @if(Auth::check() && Auth::user()->role === 'admin')
                     <div class="flex gap-3 pt-4">   
-                        @if(!$event->isFinished() && !$event->isInProgress() && !$event->isCancelled() && !$event->isClosed())
+                        @if(!$event->isFinished() && !$event->isInProgress() && !$event->isCancelled())
 
                             <a href="/events/{{ $event->id }}/edit"
                             style="background:#f59e0b;color:white;padding:8px 14px;border-radius:6px;display:inline-block;">
@@ -162,7 +162,7 @@
                             <button
                                 type="button"
                                 disabled
-                                title="{{ $event->isFinished() ? 'L\'evento è concluso' : ($event->isCancelled() ? 'L\'evento è annullato' : ($event->isInProgress() ? 'L\'evento è in corso' : 'L\'eventoè chiuso'))}}"
+                                title="{{ $event->isFinished() ? 'L\'evento è concluso' : ($event->isCancelled() ? 'L\'evento è annullato' : 'L\'evento è in corso')}}"
                                 style="background:#d1d5db;color:#6b7280;padding:8px 14px;border-radius:6px;cursor:not-allowed;">
                                 Modifica
                             </button>
