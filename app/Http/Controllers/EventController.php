@@ -326,7 +326,7 @@ class EventController extends Controller
             'cost'                  => 'required|numeric|min:0',
         ],
         [
-            // Titolo
+        // Titolo
         'title.required' => 'Il titolo è obbligatorio.',
         'title.max' => 'Il titolo non può superare i 255 caratteri.',
 
@@ -340,7 +340,7 @@ class EventController extends Controller
         // Data evento
         'event_date.required' => 'La data dell\'evento è obbligatoria.',
         'event_date.date' => 'La data dell\'evento non è valida.',
-        'event_date.after' => 'La data dell\'evento deve essere successiva a oggi.',
+        'event_date.after_or_equal' => 'La data dell\'evento deve essere oggi o una data futura.',
 
         // Ora inizio
         'start_time.required' => 'L\'ora di inizio è obbligatoria.',
@@ -353,7 +353,7 @@ class EventController extends Controller
         'registration_deadline.required' => 'Il termine per le iscrizioni è obbligatorio.',
         'registration_deadline.date' => 'Il termine per le iscrizioni non è valido.',
         'registration_deadline.before_or_equal' => 'Il termine per le iscrizioni deve essere precedente o uguale alla data dell\'evento.',
-        'registration_deadline.after' => 'Il termine per le iscrizioni deve essere successivo a oggi.',
+        'registration_deadline.after_or_equal' => 'Il termine per le iscrizioni deve essere oggi o una data futura.',
 
         // Numero massimo partecipanti
         'max_participants.required' => 'Il numero massimo di partecipanti è obbligatorio.',
