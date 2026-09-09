@@ -180,7 +180,7 @@ class EventController extends Controller
         $event = Event::findOrFail($id);
         if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso, in corso o annullato.');
+                ->with('error', 'Non puoi modificare un evento concluso, in corso, annullato o chiuso.');
         }
         return view('edit-event', [
             'event' => $event
@@ -192,9 +192,9 @@ class EventController extends Controller
 
         $event = Event::findOrFail($id);
 
-        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled()) {
+        if ($event->isFinished() || $event->isInProgress() || $event->isCancelled() || $event->isClosed()) {
             return redirect('/events')
-                ->with('error', 'Non puoi modificare un evento concluso, in corso o annullato.');
+                ->with('error', 'Non puoi modificare un evento concluso, in corso, annullato o chiuso.');
         }
         
         $data = $this->validateEvent($request, $event);
