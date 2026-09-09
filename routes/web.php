@@ -23,18 +23,20 @@ Route::middleware('auth')->group(function () {
         ->name('events.show');
 
 
-    Route::get('/notifications', [NotificationController::class, 'index'])
-        ->name('notifications.index');
+    Route::middleware(['auth', 'is_not_admin'])->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])
+            ->name('notifications.index');
 
-    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])
-        ->name('notifications.destroy');
+        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])
+            ->name('notifications.destroy');
 
-    Route::post('/events/{id}/join', [EventController::class, 'join'])
-        ->name('events.join');
+        Route::post('/events/{id}/join', [EventController::class, 'join'])
+            ->name('events.join');
 
-    Route::post('/events/{id}/leave', [EventController::class, 'leave'])
-        ->name('events.leave');
-
+        Route::post('/events/{id}/leave', [EventController::class, 'leave'])
+            ->name('events.leave');
+    });
+    
 
   //profile routes
 
