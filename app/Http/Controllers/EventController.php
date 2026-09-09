@@ -311,8 +311,8 @@ class EventController extends Controller
         $dbDeadline  = $event ? date('Y-m-d', strtotime($event->registration_deadline)) : null;
 
         // Se la data cambia (o è un nuovo evento), deve essere da OGGI in poi (after_or_equal)
-        $afterEventDate = (!$event || $request->event_date !== $dbEventDate) ? '|after_or_equal:today' : '';
-        $afterDeadline  = (!$event || $request->registration_deadline !== $dbDeadline) ? '|after_or_equal:today' : '';
+        $afterEventDate = (!$event || $request->event_date !== $dbEventDate) ? '|after:today' : '';
+        $afterDeadline  = (!$event || $request->registration_deadline !== $dbDeadline) ? '|after:today' : '';
 
         return $request->validate([
             'title'                 => 'required|max:255',
@@ -340,7 +340,7 @@ class EventController extends Controller
         // Data evento
         'event_date.required' => 'La data dell\'evento è obbligatoria.',
         'event_date.date' => 'La data dell\'evento non è valida.',
-        'event_date.after_or_equal' => 'La data dell\'evento deve essere oggi o una data futura.',
+        'event_date.after' => 'La data dell\'evento deve una data futura.',
 
         // Ora inizio
         'start_time.required' => 'L\'ora di inizio è obbligatoria.',
@@ -353,7 +353,7 @@ class EventController extends Controller
         'registration_deadline.required' => 'Il termine per le iscrizioni è obbligatorio.',
         'registration_deadline.date' => 'Il termine per le iscrizioni non è valido.',
         'registration_deadline.before_or_equal' => 'Il termine per le iscrizioni deve essere precedente o uguale alla data dell\'evento.',
-        'registration_deadline.after_or_equal' => 'Il termine per le iscrizioni deve essere oggi o una data futura.',
+        'registration_deadline.after' => 'Il termine per le iscrizioni deve essere una data futura.',
 
         // Numero massimo partecipanti
         'max_participants.required' => 'Il numero massimo di partecipanti è obbligatorio.',
