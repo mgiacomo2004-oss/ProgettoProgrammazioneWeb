@@ -310,7 +310,7 @@ class EventController extends Controller
         $dbEventDate = $event ? date('Y-m-d', strtotime($event->event_date)) : null;
         $dbDeadline  = $event ? date('Y-m-d', strtotime($event->registration_deadline)) : null;
 
-        // Se la data cambia (o è un nuovo evento), deve essere da OGGI in poi (after_or_equal)
+        // Se la data cambia (o è un nuovo evento), deve essere successiva ad oggi
         $afterEventDate = (!$event || $request->event_date !== $dbEventDate) ? '|after:today' : '';
         $afterDeadline  = (!$event || $request->registration_deadline !== $dbDeadline) ? '|after:today' : '';
 
