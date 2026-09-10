@@ -167,7 +167,7 @@ class DatabaseSeeder extends Seeder
         //EVENTO CHIUSO -> ANNULLATO
 
         Event::create([
-            'title' => 'Evento - Inizio Vicino',
+            'title' => 'Evento - Inizio Vicino (CHIUSO -> ANNULLATO)',
             'description' => 'Evento senza iscritti che sta per iniziare.',
             'location' => 'Brescia',
             'event_date' => today(),
@@ -181,7 +181,7 @@ class DatabaseSeeder extends Seeder
         //EVENTO IN CORSO -> CONCLUSO
 
         $endingEvent = Event::create([
-            'title' => 'Evento - Fine Vicina',
+            'title' => 'Evento - Fine Vicina (IN CORSO -> CONCLUSO)',
             'description' => 'Evento in corso che sta per terminare.',
             'location' => 'Bergamo',
             'event_date' => today(),
@@ -197,7 +197,7 @@ class DatabaseSeeder extends Seeder
         //EVENTO CHIUSO -> IN CORSO
 
         $startingEvent = Event::create([
-            'title' => 'Evento - Inizio Vicino con Iscritto',
+            'title' => 'Evento - Inizio Vicino con Iscritto (CHIUSO -> IN CORSO)',
             'description' => 'Evento con un iscritto che sta per iniziare.',
             'location' => 'Brescia',
             'event_date' => today(),
@@ -213,7 +213,7 @@ class DatabaseSeeder extends Seeder
         //EVENTO PIENO -> corso
 
         $fullEvent = Event::create([
-            'title' => 'Evento Pieno - Inizio Vicino',
+            'title' => 'Evento Pieno - Inizio Vicino (PIENO -> IN CORSO)',
             'description' => 'Evento pieno che sta per iniziare.',
             'location' => 'Milano',
             'event_date' => today(),
